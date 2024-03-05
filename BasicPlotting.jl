@@ -1,6 +1,6 @@
 using CSV, DataFrames, StatsBase, StatsPlots
 
-
+#Just creating charts of Mean, Median, Mode, Max, Min of conferecne winners
 PowerConfAll = CSV.read("PowerConfAll.csv", DataFrame)
 PowerNormAll = CSV.read("PowerNormAll.csv", DataFrame)
 

@@ -12,6 +12,8 @@ There may be issues with the data I tried checking it as much as I could but I w
 
 <img width="816" alt="Screenshot 2024-03-05 at 12 25 14 PM" src="https://github.com/dlshew/NCAABConfTourns24/assets/49965772/ef992fbc-4655-4007-90e8-35fe2bc6491f">
 
+Above is just a terminal print out of a a table showing the probablities. from the different models. Below is a plot of the model probablities.
+
 
 ![WCCFinalPredicts](https://github.com/dlshew/NCAABConfTourns24/assets/49965772/1c411ec9-1a3a-4e91-95f0-6bb5a07ed477)
 

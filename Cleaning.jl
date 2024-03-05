@@ -1,7 +1,6 @@
 using DataFrames, CSV, StatsBase, DataFramesMeta, StatsPlots, BenchmarkTools
-#display(@benchmark begin 
-#going to have to do the replacing outside of funcitons and change louisana lafayattes to louisana 
-#I dont have to rank 22-17 already have those 
+
+#Reading the CSV files that need to be cleaned
 Tor23 = CSV.read("2023RegSeason.csv", DataFrame)
 Tor16 = CSV.read("2016RegSeason.csv", DataFrame)
 
@@ -45,7 +44,7 @@ function cleanrest(df)
     df.WinPer = df.Wins ./ df.G
     df.Win .= 0
 end
-
+#Storing the conf values in a dictionary to add them later and dropping indpendents
 function addconfs(df1, df2)
     ConfDict = Dict(df1.TeamName .=> df1.Conf)
     df2.Conf = [ConfDict[x] for x in df2.Team]
@@ -67,7 +66,7 @@ Tor23.Team = replace.(Tor23.Team, "Louisiana Lafayette" => "Louisiana")
 Cleaned23 = Tor23
 Cleaned16 = Tor16
 
-
+#Replacing team names so the datasets match so I can add conferences
 Tor22.Team = replace.(Tor22.Team, "North Carolina St." => "N.C. State")
 Tor22.Team = replace.(Tor22.Team, "Utah Tech" => "Dixie St.")
 Tor22.Team = replace.(Tor22.Team, "Fort Wayne" => "Purdue Fort Wayne")
@@ -115,7 +114,7 @@ Tor17.Team = replace.(Tor17.Team, "Houston Christian" => "Houston Baptist")
 Tor17.Year .= 17
 addconfs(Sum17, Tor17)
 Cleaned17 = select(Tor17, :Team, :Conf, :Year, :WinPer, :ADJTempo, :WAB, :BARTHAG, :ADJOE, :ADJDE, :OEFG, :DEFG, :OFTR, :DFTR, :OTOR, :DTOR, :ORB, :DRB, :Win)
-
+#Vectors of conference winners by year
 Winners23 = ["Vermont", "Memphis", "VCU", "Duke", "Kennesaw St.", "Texas", "Marquette", "Montana St.",
 "UNC Asheville", "Purdue", "UC Santa Barbara", "Charleston", "Florida Atlantic", "Northern Kentucky", 
 "Princeton", "Iona", "Kent St.", "Howard", "Drake", "San Diego St.", "Merrimack", "Southeast Missouri St.",
@@ -159,7 +158,7 @@ Winners16 = ["Connecticut", "North Carolina", "Stony Brook", "Saint Joseph's", "
 "Middle Tennessee", "Green Bay", "Iona", "Buffalo", "Hampton", "Northern Iowa", "Fresno St.", 
 "Fairleigh Dickinson", "Austin Peay", "Oregon", "Holy Cross", "Kentucky", "Chattanooga", 
 "Stephen F. Austin", "South Dakota St.", "Little Rock", "Southern", "Cal St. Bakersfield", "Gonzaga" ]
-
+#if the team is a winner adding a 1 to their win column
 function Win(df, winners)
     Winners = subset(df, :Team => ByRow(∈(winners)), skipmissing=true)
     Losers = subset(df, :Team => ByRow(∉(winners)), skipmissing=true)
@@ -176,7 +175,7 @@ Cleaned18 = Win(Cleaned18, Winners18)
 Cleaned17 = Win(Cleaned17, Winners17)
 Cleaned16 = Win(Cleaned16, Winners16)
 
-
+#Ranking teams by their stats compared to the teams in their conferences
 function Ranks(df, year)
     Data = "ConfRanks$year"
     Data = groupby(df, :Conf)
@@ -196,7 +195,7 @@ ConfRanks18 = Ranks(Cleaned18, 18)
 ConfRanks17 = Ranks(Cleaned17, 17)
 ConfRanks16 = Ranks(Cleaned16, 16)
 
-
+#Creating a whole lot of CSV files and split datasets (mostly for no reason)
 ConfRanks23Winners = subset(ConfRanks23, :Team => ByRow(∈(Winners23)), skipmissing=true)
 ConfRanks23Losers = subset(ConfRanks23, :Team => ByRow(∉(Winners23)), skipmissing=true)
 
@@ -261,7 +260,7 @@ Normalized17Losers = subset(Normalized17, :Team => ByRow(∉(Winners17)), skipmi
 
 Normalized16Winners = subset(Normalized16, :Team => ByRow(∈(Winners16)), skipmissing=true)
 Normalized16Losers = subset(Normalized16, :Team => ByRow(∉(Winners16)), skipmissing=true)
-
+#Choosing the power high and low confs (every one not shown is "low")/still mostly doing unnecessary splits and groupings 
 Power = ["ACC", "Big East", "B10", "B12", "P12", "SEC"]
 High = ["Amer", "A10", "MWC", "WCC"]
 
@@ -427,7 +426,7 @@ PowerConfLosers = PowerConfAll[PowerConfAll.Win .== 0, :]
 HighConfLosers = HighConfAll[HighConfAll.Win .== 0, :]
 LowConfLosers = LowConfAll[LowConfAll.Win .== 0, :]
 
-
+#Mostly the files were actually going to use 
 PowerNormAll = vcat(Power23Norm, Power22Norm, Power21Norm, Power19Norm, Power18Norm, Power17Norm, Power16Norm)
 HighNormAll = vcat(High23Norm, High22Norm, High21Norm, High19Norm, High18Norm, High17Norm, High16Norm)
 LowNormAll = vcat(Low23Norm, Low22Norm, Low21Norm, Low19Norm, Low18Norm, Low17Norm, Low16Norm)
@@ -439,7 +438,7 @@ LowNormWinners = LowNormAll[LowNormAll.Win .== 1, :]
 PowerNormLosers = PowerNormAll[PowerNormAll.Win .== 0, :]
 HighNormLosers = HighNormAll[HighNormAll.Win .== 0, :]
 LowNormLosers = LowNormAll[LowNormAll.Win .== 0, :]
-
+#Saving everything that was split and grouped
 CSV.write("Clean23.csv", Cleaned23)
 CSV.write("Clean22.csv", Cleaned22)
 CSV.write("Clean21.csv", Cleaned21)
@@ -575,9 +574,9 @@ CSV.write("LowNormWinners.csv", LowNormWinners)
 CSV.write("PowerNormLosers.csv", PowerNormLosers)
 CSV.write("HighNormLosers.csv", HighNormLosers)
 CSV.write("LowNormLosers.csv", LowNormLosers)
-#end)
 
 
+#Getting the 2024 data ready for predictions
 Tor24 = CSV.read("2024RegSeason.csv", DataFrame)
 Priors24 = CSV.read("Priors24.csv", DataFrame)
 select!(Priors24, :TeamName, :Conf)

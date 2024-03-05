@@ -1,6 +1,7 @@
 using DataFrames, CSV, StatsBase, DataFramesMeta, StatsPlots, BenchmarkTools
-
-#Loading data sources from CSV files into DataFrames
+#display(@benchmark begin 
+#going to have to do the replacing outside of funcitons and change louisana lafayattes to louisana 
+#I dont have to rank 22-17 already have those 
 Tor23 = CSV.read("2023RegSeason.csv", DataFrame)
 Tor16 = CSV.read("2016RegSeason.csv", DataFrame)
 
@@ -20,25 +21,24 @@ Tor17 = CSV.read("2017RegSeason.csv", DataFrame)
 Sum17 = CSV.read("summary17_pt.csv", DataFrame)
 
 
-#Adding column names and cleaning up 2016 and 2023
+#For 2017 through 2022 I don't have the conferecnes already in the data sets so these have to be different 
 function cleanup2316(df, year)
     rename!(df, :Column1 => :Team, :Column2 => :ADJOE, :Column3 => :ADJDE, :Column4 => :BARTHAG,
     :Column6 => :Wins, :Column7 => :G, :Column8 => :OEFG, :Column9 => :DEFG, :Column10 => :OFTR,
-    :Column11 => :DFTR, :Column12 => :OTOR, :Column13 => :DTOR, :Column14 => :ORB, :Column15 => :ORBA,
+    :Column11 => :DFTR, :Column12 => :OTOR, :Column13 => :DTOR, :Column14 => :ORB, :Column15 => :DRB,
     :Column27 => :ADJTempo, :Column35 => :WAB
     )  
     df.Year .= year
     df.WinPer = df.Wins ./ df.G
     df.Win .= 0
-    select!(df, :Team, :Conf, :Year, :WinPer, :ADJTempo, :WAB, :BARTHAG, :ADJOE, :ADJDE, :OEFG, :DEFG, :OFTR, :DFTR, :OTOR, :DTOR, :ORB, :ORBA, :Win)
+    select!(df, :Team, :Conf, :Year, :WinPer, :ADJTempo, :WAB, :BARTHAG, :ADJOE, :ADJDE, :OEFG, :DEFG, :OFTR, :DFTR, :OTOR, :DTOR, :ORB, :DRB, :Win)
     @subset!(df, :Conf .!= "ind")
 end   
 
-#Same as above for every other year
 function cleanrest(df)
     rename!(df, :Column1 => :Team, :Column2 => :ADJOE, :Column3 => :ADJDE, :Column4 => :BARTHAG,
     :Column6 => :Wins, :Column7 => :G, :Column8 => :OEFG, :Column9 => :DEFG, :Column10 => :OFTR,
-    :Column11 => :DFTR, :Column12 => :OTOR, :Column13 => :DTOR, :Column14 => :ORB, :Column15 => :ORBA,
+    :Column11 => :DFTR, :Column12 => :OTOR, :Column13 => :DTOR, :Column14 => :ORB, :Column15 => :DRB,
     :Column27 => :ADJTempo, :Column35 => :WAB
     )  
 
@@ -52,6 +52,7 @@ function addconfs(df1, df2)
     @subset!(df2, :Conf .!= "ind")
 end 
 
+
 cleanup2316(Tor23, 23)
 cleanup2316(Tor16, 16)
 cleanrest(Tor22)
@@ -60,12 +61,12 @@ cleanrest(Tor19)
 cleanrest(Tor18)
 cleanrest(Tor17)
 
-#Cleaing up names so they match the kenpom(summary csv's) data for adding conferences 
 Tor23.Team = replace.(Tor23.Team, "College of Charleston" => "Charleston")
 Tor23.Team = replace.(Tor23.Team, "Louisiana Lafayette" => "Louisiana")
 
 Cleaned23 = Tor23
 Cleaned16 = Tor16
+
 
 Tor22.Team = replace.(Tor22.Team, "North Carolina St." => "N.C. State")
 Tor22.Team = replace.(Tor22.Team, "Utah Tech" => "Dixie St.")
@@ -77,7 +78,7 @@ Tor22.Team = replace.(Tor22.Team, "LIU Brooklyn" => "LIU")
 Tor22.Team = replace.(Tor22.Team, "Detroit" => "Detroit Mercy")
 Tor22.Year .= 22
 addconfs(Sum22, Tor22)
-Cleaned22 = select(Tor22, :Team, :Conf, :Year, :WinPer, :ADJTempo, :WAB, :BARTHAG, :ADJOE, :ADJDE, :OEFG, :DEFG, :OFTR, :DFTR, :OTOR, :DTOR, :ORB, :ORBA, :Win)
+Cleaned22 = select(Tor22, :Team, :Conf, :Year, :WinPer, :ADJTempo, :WAB, :BARTHAG, :ADJOE, :ADJDE, :OEFG, :DEFG, :OFTR, :DFTR, :OTOR, :DTOR, :ORB, :DRB, :Win)
 
 Tor21.Team = replace.(Tor21.Team, "North Carolina St." => "N.C. State")
 Tor21.Team = replace.(Tor21.Team, "Utah Tech" => "Dixie St.")
@@ -88,7 +89,7 @@ Tor21.Team = replace.(Tor21.Team, "Louisiana Lafayette" => "Louisiana")
 Tor21.Team = replace.(Tor21.Team, "LIU Brooklyn" => "LIU")
 Tor21.Year .= 21
 addconfs(Sum21, Tor21)
-Cleaned21 = select(Tor21, :Team, :Conf, :Year, :WinPer, :ADJTempo, :WAB, :BARTHAG, :ADJOE, :ADJDE, :OEFG, :DEFG, :OFTR, :DFTR, :OTOR, :DTOR, :ORB, :ORBA, :Win)
+Cleaned21 = select(Tor21, :Team, :Conf, :Year, :WinPer, :ADJTempo, :WAB, :BARTHAG, :ADJOE, :ADJDE, :OEFG, :DEFG, :OFTR, :DFTR, :OTOR, :DTOR, :ORB, :DRB, :Win)
 
 
 Tor19.Team = replace.(Tor19.Team, "North Carolina St." => "N.C. State")
@@ -99,21 +100,21 @@ Tor19.Team = replace.(Tor19.Team, "Houston Christian" => "Houston Baptist")
 Tor19.Team = replace.(Tor19.Team, "Louisiana Lafayette" => "Louisiana")
 Tor19.Year .= 19
 addconfs(Sum19, Tor19)
-Cleaned19 = select(Tor19, :Team, :Conf, :Year, :WinPer, :ADJTempo, :WAB, :BARTHAG, :ADJOE, :ADJDE, :OEFG, :DEFG, :OFTR, :DFTR, :OTOR, :DTOR, :ORB, :ORBA, :Win)
+Cleaned19 = select(Tor19, :Team, :Conf, :Year, :WinPer, :ADJTempo, :WAB, :BARTHAG, :ADJOE, :ADJDE, :OEFG, :DEFG, :OFTR, :DFTR, :OTOR, :DTOR, :ORB, :DRB, :Win)
 
 
 Tor18.Team = replace.(Tor18.Team, "Utah Tech" => "Dixie St.")
 Tor18.Team = replace.(Tor18.Team, "Houston Christian" => "Houston Baptist")
 Tor18.Year .= 18
 addconfs(Sum18, Tor18)
-Cleaned18 = select(Tor18, :Team, :Conf, :Year, :WinPer, :ADJTempo, :WAB, :BARTHAG, :ADJOE, :ADJDE, :OEFG, :DEFG, :OFTR, :DFTR, :OTOR, :DTOR, :ORB, :ORBA, :Win)
+Cleaned18 = select(Tor18, :Team, :Conf, :Year, :WinPer, :ADJTempo, :WAB, :BARTHAG, :ADJOE, :ADJDE, :OEFG, :DEFG, :OFTR, :DFTR, :OTOR, :DTOR, :ORB, :DRB, :Win)
 
 
 Tor17.Team = replace.(Tor17.Team, "Utah Tech" => "Dixie St.")
 Tor17.Team = replace.(Tor17.Team, "Houston Christian" => "Houston Baptist")
 Tor17.Year .= 17
 addconfs(Sum17, Tor17)
-Cleaned17 = select(Tor17, :Team, :Conf, :Year, :WinPer, :ADJTempo, :WAB, :BARTHAG, :ADJOE, :ADJDE, :OEFG, :DEFG, :OFTR, :DFTR, :OTOR, :DTOR, :ORB, :ORBA, :Win)
+Cleaned17 = select(Tor17, :Team, :Conf, :Year, :WinPer, :ADJTempo, :WAB, :BARTHAG, :ADJOE, :ADJDE, :OEFG, :DEFG, :OFTR, :DFTR, :OTOR, :DTOR, :ORB, :DRB, :Win)
 
 Winners23 = ["Vermont", "Memphis", "VCU", "Duke", "Kennesaw St.", "Texas", "Marquette", "Montana St.",
 "UNC Asheville", "Purdue", "UC Santa Barbara", "Charleston", "Florida Atlantic", "Northern Kentucky", 
@@ -158,7 +159,7 @@ Winners16 = ["Connecticut", "North Carolina", "Stony Brook", "Saint Joseph's", "
 "Middle Tennessee", "Green Bay", "Iona", "Buffalo", "Hampton", "Northern Iowa", "Fresno St.", 
 "Fairleigh Dickinson", "Austin Peay", "Oregon", "Holy Cross", "Kentucky", "Chattanooga", 
 "Stephen F. Austin", "South Dakota St.", "Little Rock", "Southern", "Cal St. Bakersfield", "Gonzaga" ]
-#Adding winners based on the collections above
+
 function Win(df, winners)
     Winners = subset(df, :Team => ByRow(∈(winners)), skipmissing=true)
     Losers = subset(df, :Team => ByRow(∉(winners)), skipmissing=true)
@@ -175,7 +176,7 @@ Cleaned18 = Win(Cleaned18, Winners18)
 Cleaned17 = Win(Cleaned17, Winners17)
 Cleaned16 = Win(Cleaned16, Winners16)
 
-#Ranking stats by the conference they play in only 
+
 function Ranks(df, year)
     Data = "ConfRanks$year"
     Data = groupby(df, :Conf)
@@ -183,7 +184,7 @@ function Ranks(df, year)
     :BARTHAG = competerank(:BARTHAG, rev=true), :ADJOE = competerank(:ADJOE, rev=true), :ADJDE = competerank(:ADJDE), 
     :OEFG = competerank(:OEFG, rev=true), :DEFG = competerank(:DEFG), :OFTR = competerank(:OFTR, rev=true),
     :DFTR = competerank(:DFTR), :OTOR = competerank(:OTOR), :DTOR = competerank(:DTOR, rev=true), :ORB = competerank(:ORB, rev=true),
-    :ORBA = competerank(:ORBA), :Win)
+    :DRB = competerank(:DRB, rev=true), :Win)
     return Rank
 end
 
@@ -194,6 +195,7 @@ ConfRanks19 = Ranks(Cleaned19, 19)
 ConfRanks18 = Ranks(Cleaned18, 18)
 ConfRanks17 = Ranks(Cleaned17, 17)
 ConfRanks16 = Ranks(Cleaned16, 16)
+
 
 ConfRanks23Winners = subset(ConfRanks23, :Team => ByRow(∈(Winners23)), skipmissing=true)
 ConfRanks23Losers = subset(ConfRanks23, :Team => ByRow(∉(Winners23)), skipmissing=true)
@@ -217,28 +219,27 @@ ConfRanks16Winners = subset(ConfRanks16, :Team => ByRow(∈(Winners16)), skipmis
 ConfRanks16Losers = subset(ConfRanks16, :Team => ByRow(∉(Winners16)), skipmissing=true)
 
 
-#using zcores to normalize data for later uses
+
 Normalized23 = @transform(Cleaned23, :WinPer = zscore(:WinPer), :ADJTempo = zscore(:ADJTempo), :WAB = zscore(:WAB), :BARTHAG = zscore(:BARTHAG), :ADJOE = zscore(:ADJOE), :ADJDE = zscore(:ADJDE),
-:OEFG = zscore(:OEFG), :DEFG = zscore(:DEFG), :OFTR = zscore(:OFTR), :DFTR = zscore(:DFTR), :OTOR = zscore(:OTOR), :DTOR = zscore(:DTOR), :ORB = zscore(:ORB), :ORBA = zscore(:ORBA))
+:OEFG = zscore(:OEFG), :DEFG = zscore(:DEFG), :OFTR = zscore(:OFTR), :DFTR = zscore(:DFTR), :OTOR = zscore(:OTOR), :DTOR = zscore(:DTOR), :ORB = zscore(:ORB), :DRB = zscore(:DRB))
 
 Normalized22 = @transform(Cleaned22, :WinPer = zscore(:WinPer), :ADJTempo = zscore(:ADJTempo), :WAB = zscore(:WAB), :BARTHAG = zscore(:BARTHAG), :ADJOE = zscore(:ADJOE), :ADJDE = zscore(:ADJDE),
-:OEFG = zscore(:OEFG), :DEFG = zscore(:DEFG), :OFTR = zscore(:OFTR), :DFTR = zscore(:DFTR), :OTOR = zscore(:OTOR), :DTOR = zscore(:DTOR), :ORB = zscore(:ORB), :ORBA = zscore(:ORBA))
+:OEFG = zscore(:OEFG), :DEFG = zscore(:DEFG), :OFTR = zscore(:OFTR), :DFTR = zscore(:DFTR), :OTOR = zscore(:OTOR), :DTOR = zscore(:DTOR), :ORB = zscore(:ORB), :DRB = zscore(:DRB))
 
 Normalized21 = @transform(Cleaned21, :WinPer = zscore(:WinPer), :ADJTempo = zscore(:ADJTempo), :WAB = zscore(:WAB), :BARTHAG = zscore(:BARTHAG), :ADJOE = zscore(:ADJOE), :ADJDE = zscore(:ADJDE),
-:OEFG = zscore(:OEFG), :DEFG = zscore(:DEFG), :OFTR = zscore(:OFTR), :DFTR = zscore(:DFTR), :OTOR = zscore(:OTOR), :DTOR = zscore(:DTOR), :ORB = zscore(:ORB), :ORBA = zscore(:ORBA))
+:OEFG = zscore(:OEFG), :DEFG = zscore(:DEFG), :OFTR = zscore(:OFTR), :DFTR = zscore(:DFTR), :OTOR = zscore(:OTOR), :DTOR = zscore(:DTOR), :ORB = zscore(:ORB), :DRB = zscore(:DRB))
 
 Normalized19 = @transform(Cleaned19, :WinPer = zscore(:WinPer), :ADJTempo = zscore(:ADJTempo), :WAB = zscore(:WAB), :BARTHAG = zscore(:BARTHAG), :ADJOE = zscore(:ADJOE), :ADJDE = zscore(:ADJDE),
-:OEFG = zscore(:OEFG), :DEFG = zscore(:DEFG), :OFTR = zscore(:OFTR), :DFTR = zscore(:DFTR), :OTOR = zscore(:OTOR), :DTOR = zscore(:DTOR), :ORB = zscore(:ORB), :ORBA = zscore(:ORBA))
+:OEFG = zscore(:OEFG), :DEFG = zscore(:DEFG), :OFTR = zscore(:OFTR), :DFTR = zscore(:DFTR), :OTOR = zscore(:OTOR), :DTOR = zscore(:DTOR), :ORB = zscore(:ORB), :DRB = zscore(:DRB))
 
 Normalized18 = @transform(Cleaned18, :WinPer = zscore(:WinPer), :ADJTempo = zscore(:ADJTempo), :WAB = zscore(:WAB), :BARTHAG = zscore(:BARTHAG), :ADJOE = zscore(:ADJOE), :ADJDE = zscore(:ADJDE),
-:OEFG = zscore(:OEFG), :DEFG = zscore(:DEFG), :OFTR = zscore(:OFTR), :DFTR = zscore(:DFTR), :OTOR = zscore(:OTOR), :DTOR = zscore(:DTOR), :ORB = zscore(:ORB), :ORBA = zscore(:ORBA))
+:OEFG = zscore(:OEFG), :DEFG = zscore(:DEFG), :OFTR = zscore(:OFTR), :DFTR = zscore(:DFTR), :OTOR = zscore(:OTOR), :DTOR = zscore(:DTOR), :ORB = zscore(:ORB), :DRB = zscore(:DRB))
 
 Normalized17 = @transform(Cleaned17, :WinPer = zscore(:WinPer), :ADJTempo = zscore(:ADJTempo), :WAB = zscore(:WAB), :BARTHAG = zscore(:BARTHAG), :ADJOE = zscore(:ADJOE), :ADJDE = zscore(:ADJDE),
-:OEFG = zscore(:OEFG), :DEFG = zscore(:DEFG), :OFTR = zscore(:OFTR), :DFTR = zscore(:DFTR), :OTOR = zscore(:OTOR), :DTOR = zscore(:DTOR), :ORB = zscore(:ORB), :ORBA = zscore(:ORBA))
+:OEFG = zscore(:OEFG), :DEFG = zscore(:DEFG), :OFTR = zscore(:OFTR), :DFTR = zscore(:DFTR), :OTOR = zscore(:OTOR), :DTOR = zscore(:DTOR), :ORB = zscore(:ORB), :DRB = zscore(:DRB))
 
 Normalized16 = @transform(Cleaned16, :WinPer = zscore(:WinPer), :ADJTempo = zscore(:ADJTempo), :WAB = zscore(:WAB), :BARTHAG = zscore(:BARTHAG), :ADJOE = zscore(:ADJOE), :ADJDE = zscore(:ADJDE),
-:OEFG = zscore(:OEFG), :DEFG = zscore(:DEFG), :OFTR = zscore(:OFTR), :DFTR = zscore(:DFTR), :OTOR = zscore(:OTOR), :DTOR = zscore(:DTOR), :ORB = zscore(:ORB), :ORBA = zscore(:ORBA))
-
+:OEFG = zscore(:OEFG), :DEFG = zscore(:DEFG), :OFTR = zscore(:OFTR), :DFTR = zscore(:DFTR), :OTOR = zscore(:OTOR), :DTOR = zscore(:DTOR), :ORB = zscore(:ORB), :DRB = zscore(:DRB))
 
 Normalized23Winners = subset(Normalized23, :Team => ByRow(∈(Winners23)), skipmissing=true)
 Normalized23Losers = subset(Normalized23, :Team => ByRow(∉(Winners23)), skipmissing=true)
@@ -265,7 +266,7 @@ Power = ["ACC", "Big East", "B10", "B12", "P12", "SEC"]
 High = ["Amer", "A10", "MWC", "WCC"]
 
 
-#Splitting the data into power high and low conferecnes (chosen by me)
+
 Power23Norm = subset(Normalized23, :Conf => ByRow(∈(Power)), skipmissing=true)
 sort!(Power23Norm, :Conf)
 
@@ -439,7 +440,6 @@ PowerNormLosers = PowerNormAll[PowerNormAll.Win .== 0, :]
 HighNormLosers = HighNormAll[HighNormAll.Win .== 0, :]
 LowNormLosers = LowNormAll[LowNormAll.Win .== 0, :]
 
-#Writing all the CSV files really only using lines 555 to 561 
 CSV.write("Clean23.csv", Cleaned23)
 CSV.write("Clean22.csv", Cleaned22)
 CSV.write("Clean21.csv", Cleaned21)
@@ -575,7 +575,46 @@ CSV.write("LowNormWinners.csv", LowNormWinners)
 CSV.write("PowerNormLosers.csv", PowerNormLosers)
 CSV.write("HighNormLosers.csv", HighNormLosers)
 CSV.write("LowNormLosers.csv", LowNormLosers)
+#end)
 
+
+Tor24 = CSV.read("2024RegSeason.csv", DataFrame)
+Priors24 = CSV.read("Priors24.csv", DataFrame)
+select!(Priors24, :TeamName, :Conf)
+
+cleanrest(Tor24)
+Tor24.Team = replace.(Tor24.Team, "North Carolina St." => "N.C. State")
+Tor24.Team = replace.(Tor24.Team, "St. Francis PA" => "Saint Francis")
+Tor24.Team = replace.(Tor24.Team, "Fort Wayne" => "Purdue Fort Wayne")
+Tor24.Team = replace.(Tor24.Team, "College of Charleston" => "Charleston")
+Tor24.Team = replace.(Tor24.Team, "Louisiana Lafayette" => "Louisiana")
+Tor24.Team = replace.(Tor24.Team, "LIU Brooklyn" => "LIU")
+Tor24.Team = replace.(Tor24.Team, "Detroit" => "Detroit Mercy")
+
+addconfs(Priors24, Tor24)
+Tor24.Year .= 24
+Cleaned24 = select(Tor24, :Team, :Conf, :Year, :WinPer, :ADJTempo, :WAB, :BARTHAG, :ADJOE, :ADJDE, :OEFG, :DEFG, :OFTR, :DFTR, :OTOR, :DTOR, :ORB, :DRB, :Win)
+
+
+function PullConf(Df, Conference, Year)
+    Conf = subset(Df, :Conf => ByRow(∈([Conference])), skipmissing=true)
+    ConfNorm = @transform(Conf, :WinPer = zscore(:WinPer), :ADJTempo = zscore(:ADJTempo), :WAB = zscore(:WAB), :BARTHAG = zscore(:BARTHAG), :ADJOE = zscore(:ADJOE), :ADJDE = zscore(:ADJDE),
+    :OEFG = zscore(:OEFG), :DEFG = zscore(:DEFG), :OFTR = zscore(:OFTR), :DFTR = zscore(:DFTR), :OTOR = zscore(:OTOR), :DTOR = zscore(:DTOR), :ORB = zscore(:ORB), :DRB = zscore(:DRB))
+    ConfRanks = Ranks(Conf, Year)
+
+    CSV.write(Conference * "Norm.csv", ConfNorm)
+    CSV.write(Conference * "Ranks.csv", ConfRanks)
+end
+
+
+PullConf(Cleaned24, "ASun", 24)
+PullConf(Cleaned24, "Horz", 24)
+PullConf(Cleaned24, "Pat", 24)
+PullConf(Cleaned24, "SB", 24)
+PullConf(Cleaned24, "NEC", 24)
+PullConf(Cleaned24, "OVC", 24)
+PullConf(Cleaned24, "MVC", 24)
+PullConf(Cleaned24, "WCC", 24)
 
 
 

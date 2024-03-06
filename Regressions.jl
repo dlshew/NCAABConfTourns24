@@ -76,7 +76,7 @@ OVCNorm = CSV.read("OVCNorm.csv", DataFrame)
 MVCNorm = CSV.read("MVCNorm.csv", DataFrame)
 WCCNorm = CSV.read("WCCNorm.csv", DataFrame)
 
-
+#Qpplying the models from above, didn't do any splititng for training and testing.
 function Predictions(Conf, TypeOLS, TypePro)
     Conf.OLS = predict(TypeOLS, Conf)
     Conf.Probit = predict(TypePro, Conf)

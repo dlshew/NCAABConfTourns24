@@ -3,10 +3,10 @@ using CSV, DataFrames, DataFramesMeta, Random, MLJ
 PowerRanks = CSV.read("PowerConfAll.csv", DataFrame)
 HighRanks = CSV.read("HighConfAll.csv", DataFrame)
 LowRanks = CSV.read("LowConfAll.csv", DataFrame)
-
+#creating the random forest of 100 decision trees with max depth 3
 Forest = @load RandomForestClassifier pkg=DecisionTree
 forest = Forest(max_depth=3, n_trees=100)
-
+#Pretty similar to the decision tree training code
 select!(PowerRanks, Not([:WinPer, :BARTHAG]))
 shuffle!(PowerRanks)
 

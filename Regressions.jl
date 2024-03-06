@@ -76,7 +76,7 @@ OVCNorm = CSV.read("OVCNorm.csv", DataFrame)
 MVCNorm = CSV.read("MVCNorm.csv", DataFrame)
 WCCNorm = CSV.read("WCCNorm.csv", DataFrame)
 
-#Qpplying the models from above, didn't do any splititng for training and testing.
+#Applying the models from above, didn't do any splititng for training and testing.
 function Predictions(Conf, TypeOLS, TypePro)
     Conf.OLS = predict(TypeOLS, Conf)
     Conf.Probit = predict(TypePro, Conf)
@@ -84,13 +84,14 @@ function Predictions(Conf, TypeOLS, TypePro)
     select!(Conf, :Team, :Conf, :OLS, :Probit)
     return Conf
 end
+#plotting the predictions
 function Plotting(DF, ConfName::String)
     ConfOLS = @df DF scatter(:Team, :OLS, color=:red, title="$ConfName Linear Regression", legend=:none, rotation=45, xflip=true)
     ConfProbit = @df DF scatter(:Team, :OLS, color=:red, title="$ConfName Probit Regression", legend=:none, rotation=45, xflip=true)
     plot(ConfOLS, ConfProbit, layout=(1, 2))
     savefig(ConfName * "RegressionPlots")
 end
-
+#calling the above functions
 ASun = Predictions(ASunNorm, Lols, ProbitL)
 Plotting(ASun, "ASun")
 
@@ -114,7 +115,7 @@ Plotting(MVC, "MVC")
 
 WCC = Predictions(WCCNorm, Lols, ProbitL)
 Plotting(WCC, "WCC")
-
+#Saving predictions for later
 CSV.write("ASunRegTable.csv", ASun)
 CSV.write("HorzRegTable.csv", Horz)
 CSV.write("PatRegTable.csv", Pat)

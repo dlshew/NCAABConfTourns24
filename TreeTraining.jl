@@ -4,27 +4,29 @@ PowerRanks = CSV.read("PowerConfAll.csv", DataFrame)
 HighRanks = CSV.read("HighConfAll.csv", DataFrame)
 LowRanks = CSV.read("LowConfAll.csv", DataFrame)
 
+#Creating a decison tree with a max depth of 3
 Tree = @load DecisionTreeClassifier pkg=DecisionTree
 ctree = Tree(max_depth=3)
 
-
+#Not using WinPer or Barthag highly correlated to WAB and shuffling the data
 select!(PowerRanks, Not([:WinPer, :BARTHAG]))
 shuffle!(PowerRanks)
 
+#Splitting into training and testing data
 TrainPower, TestPower = partition(PowerRanks, .75)
 yTrainPower, XTrainPower = unpack(TrainPower, ==(:Win))
 yTestPower, XTestPower = unpack(TestPower, ==(:Win))
 yTrainP = coerce(yTrainPower, Multiclass)
 
-
+#Fitting the decision tree and making predictions on testing data
 machPower = machine(ctree, XTrainPower[:, 4:14], yTrainP) |> fit!
 yhatPower = predict(machPower, XTestPower[:, 4:14])
-
+#showing some of the data
 display([yhatPower yTestPower])
 println(log_loss(yhatPower, yTestPower))
 println(broadcast(pdf, yhatPower, yTestPower))
 display(report(machPower))
-
+#plotting the tree and saving it
 treePower = fitted_params(machPower).tree
 plot(treePower)
 savefig("PowerConfTree.png")
@@ -76,7 +78,7 @@ display(report(machLow))
 treeLow = fitted_params(machLow).tree
 plot(treeLow, size=(1280,720))
 savefig("LowConfTree.png")
-
+#saving the models
 MLJ.save("PowerDecTree.jlso", machPower)
 MLJ.save("HighDecTree.jlso", machHigh)
 MLJ.save("LowDecTree.jlso", machLow)

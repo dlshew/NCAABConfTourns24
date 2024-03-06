@@ -1,10 +1,10 @@
 using CSV, DataFrames, DataFramesMeta, Random, MLJ, TreeRecipe, Plots
-
+#loading the models fromm TreeTtraining.jl
 Tree = @load DecisionTreeClassifier pkg=DecisionTree
 PowerTree = machine("PowerDecTree.jlso")
 HighTree = machine("HighDecTree.jlso")
 LowTree = machine("LowDecTree.jlso")
-
+#function to apply the models to 2024 data
 function DecTree(Conf, Mach)
     ConfRanks = CSV.read(Conf * "Ranks.csv", DataFrame)
     select!(ConfRanks, Not([:WinPer, :BARTHAG]))
@@ -18,7 +18,7 @@ function DecTree(Conf, Mach)
 
     return ConfRanks
 end
-
+#calling the functions of conferences
 ASunRanks = DecTree("ASun", LowTree)
 HorzRanks = DecTree("Horz", LowTree)
 PatRanks = DecTree("Pat", LowTree)
@@ -30,7 +30,7 @@ WCCRanks = DecTree("WCC", HighTree)
 CAARanks = DecTree("CAA", LowTree)
 SCRanks = DecTree("SC", LowTree)
 SumRanks = DecTree("Sum", LowTree)
-
+#writing the predictions to use later
 CSV.write("ASunDTTable.csv", ASunRanks)
 CSV.write("HorzDTTable.csv", HorzRanks)
 CSV.write("PatDTTable.csv", PatRanks)

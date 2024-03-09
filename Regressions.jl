@@ -1,11 +1,10 @@
-using DataFrames, StatsPlots, GLM, CSV, StatsBase
+using DataFrames, StatsPlots, GLM, CSV, StatsBase, Normalization
 
 PowerNormAll = CSV.read("PowerNormAll.csv", DataFrame)
 HighNormAll = CSV.read("HighNormAll.csv", DataFrame)
 LowNormAll = CSV.read("LowNormAll.csv", DataFrame)
 
-#Training the linear ordinary least squares and probit regression
-#Also plotting the results
+#Fitting the linear and probit regression models to the data
 Pols = lm(@formula(Win ~ WAB+OEFG+DEFG+OFTR+DFTR+OFTR+DFTR+OTOR+DTOR+ORB+DRB), PowerNormAll)
 PowerNormAll.OLS = predict(Pols)
 
@@ -16,7 +15,7 @@ select!(PowerNormAll, :Team, :Conf, :Year, :Win, :OLS, :Probit)
 
 PowerNormWinners = PowerNormAll[PowerNormAll.Win .== 1, :]
 PowerNormLosers = PowerNormAll[PowerNormAll.Win .== 0, :]
-
+#Plots to test see if the data makes sense 
 @df PowerNormLosers scatter(:Team, :OLS, color=:red, title="Power Conference (Linear Regression)", label="Losers")
 @df PowerNormWinners scatter!(:OLS, color=:green, label="Winners", legend=:topright, rotation=45)
 savefig("TestingOLSPower.png")
@@ -66,61 +65,83 @@ savefig("TestingOLSLow.png")
 @df LowNormWinners scatter!(:Probit, color=:green, label="Winners", legend=:topright, rotation=45)
 savefig("TestingProbitLow.png")
 
-#loading and applying the linear and probit models to 2024 confs
-ASunNorm = CSV.read("AsunNorm.csv", DataFrame)
-HorzNorm = CSV.read("HorzNorm.csv", DataFrame)
-PatNorm = CSV.read("PatNorm.csv", DataFrame)
-SunBeltNorm = CSV.read("SBNorm.csv", DataFrame)
-NECNorm = CSV.read("NECNorm.csv", DataFrame)
-OVCNorm = CSV.read("OVCNorm.csv", DataFrame)
-MVCNorm = CSV.read("MVCNorm.csv", DataFrame)
-WCCNorm = CSV.read("WCCNorm.csv", DataFrame)
-
-#Applying the models from above, didn't do any splititng for training and testing.
-function Predictions(Conf, TypeOLS, TypePro)
+#loads 2024 data and uses the fitted models to make predictions 
+function Predictions(Conference, TypeOLS, TypePro)
+    Conf = CSV.read(Conference * "Norm.csv", DataFrame)
     Conf.OLS = predict(TypeOLS, Conf)
     Conf.Probit = predict(TypePro, Conf)
+    Conf.Probit = Conf.Probit ./ sum(Conf.Probit)
     sort!(Conf, :Probit, rev=true)
     select!(Conf, :Team, :Conf, :OLS, :Probit)
     return Conf
 end
-#plotting the predictions
+#Plots the results of the linear and probit models
 function Plotting(DF, ConfName::String)
-    ConfOLS = @df DF scatter(:Team, :OLS, color=:red, title="$ConfName Linear Regression", legend=:none, rotation=45, xflip=true)
-    ConfProbit = @df DF scatter(:Team, :OLS, color=:red, title="$ConfName Probit Regression", legend=:none, rotation=45, xflip=true)
+    ConfOLS = @df DF scatter(:Team, :OLS, color=:red, title="$ConfName Linear Regression", legend=:none,
+    xlabel="Teams", ylabel="Probablites", rotation=45, xflip=true)
+    ConfProbit = @df DF scatter(:Team, :Probit, color=:red, title="$ConfName Probit Regression", legend=:none,
+    xlabel="Teams", ylabel="Probablites", rotation=45, xflip=true)
     plot(ConfOLS, ConfProbit, layout=(1, 2))
     savefig(ConfName * "RegressionPlots")
 end
-#calling the above functions
-ASun = Predictions(ASunNorm, Lols, ProbitL)
+#Calling the above functions 
+ASun = Predictions("ASun", Lols, ProbitL)
 Plotting(ASun, "ASun")
 
-Horz = Predictions(HorzNorm, Lols, ProbitL)
+Horz = Predictions("Horz", Lols, ProbitL)
 Plotting(Horz, "Horz")
 
-Pat = Predictions(PatNorm, Lols, ProbitL)
+Pat = Predictions("Pat", Lols, ProbitL)
 Plotting(Pat, "Pat")
 
-SunBelt = Predictions(SunBeltNorm, Lols, ProbitL)
+SunBelt = Predictions("SB", Lols, ProbitL)
 Plotting(SunBelt, "SunBelt")
 
-NEC = Predictions(NECNorm, Lols, ProbitL)
+NEC = Predictions("NEC", Lols, ProbitL)
 Plotting(NEC, "Nec")
 
-OVC = Predictions(OVCNorm, Lols, ProbitL)
+OVC = Predictions("OVC", Lols, ProbitL)
 Plotting(OVC, "OVC")
 
-MVC = Predictions(MVCNorm, Lols, ProbitL)
+BSth = Predictions("BSth", Lols, ProbitL)
+Plotting(BSth, "BSth")
+
+MVC = Predictions("MVC", Lols, ProbitL)
 Plotting(MVC, "MVC")
 
-WCC = Predictions(WCCNorm, Lols, ProbitL)
+WCC = Predictions("WCC", Lols, ProbitL)
 Plotting(WCC, "WCC")
-#Saving predictions for later
+
+CAA = Predictions("CAA", Lols, ProbitL)
+Plotting(CAA, "CAA")
+
+SC = Predictions("SC", Lols, ProbitL)
+Plotting(SC, "SC")
+
+Sum = Predictions("Sum", Lols, ProbitL)
+Plotting(Sum, "Sum")
+
+AE = Predictions("AE", Lols, ProbitL)
+Plotting(AE, "AE")
+
+BSky = Predictions("BSky", Lols, ProbitL)
+Plotting(BSky, "BSky")
+
+Slnd = Predictions("Slnd", Lols, ProbitL)
+Plotting(Slnd, "Slnd")
+#Saving "regression tables" to have them for later 
 CSV.write("ASunRegTable.csv", ASun)
 CSV.write("HorzRegTable.csv", Horz)
 CSV.write("PatRegTable.csv", Pat)
 CSV.write("SunBeltRegTable.csv", SunBelt)
 CSV.write("NECRegTable.csv", NEC)
 CSV.write("OVCRegTable.csv", OVC)
+CSV.write("BSthRegTable.csv", BSth)
 CSV.write("MVCRegTable.csv", MVC)
 CSV.write("WCCRegTable.csv", WCC)
+CSV.write("CAARegTable.csv", CAA)
+CSV.write("SCRegTable.csv", SC)
+CSV.write("SumRegTable.csv", Sum)
+CSV.write("AERegTable.csv", AE)
+CSV.write("BSkyRegTable.csv", BSky)
+CSV.write("SlndRegTable.csv", Slnd)
